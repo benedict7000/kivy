@@ -1,12 +1,12 @@
 [app]
-title = KivyMD App
-package.name = kivymdapp
+title = Bible App
+package.name = bibleapp
 package.domain = org.example
 
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 
-version = 0.1
+version = 1.0
 
 requirements = python3,kivy,kivymd
 
@@ -23,6 +23,9 @@ android.gradle_dependencies =
 # Optimization flags
 android.release_artifact = apk
 android.logcat_filters = *:S python:D
+
+# Build settings
+android.arch = armeabi-v7a
 
 [buildozer]
 log_level = 2
