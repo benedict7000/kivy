@@ -17,6 +17,14 @@ jobs:
       with:
         python-version: '3.11'
     
+    - name: Cache buildozer
+      uses: actions/cache@v4
+      with:
+        path: ~/.buildozer
+        key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+        restore-keys: |
+          buildozer-${{ runner.os }}-
+    
     - name: Install system dependencies
       run: |
         sudo apt-get update
@@ -27,20 +35,42 @@ jobs:
           unzip \
           build-essential \
           libffi-dev \
-          libssl-dev
+          libssl-dev \
+          libncurses5 \
+          libncurses5-dev
     
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
-        pip install cython buildozer kivy kivymd
+        pip install --upgrade cython buildozer kivy
     
-    - name: Build APK
+    - name: Build APK with timeout
+      timeout-minutes: 120
       run: |
-        buildozer android debug
+        buildozer android debug 2>&1 | tee build.log
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then
+          echo "Build failed, checking log..."
+          tail -100 build.log
+          exit 1
+        fi
+    
+    - name: Check APK output
+      run: |
+        ls -lah bin/ || echo "No bin directory"
+        find . -name "*.apk" -type f 2>/dev/null || echo "No APK found"
     
     - name: Upload APK
+      if: success()
       uses: actions/upload-artifact@v4
       with:
         name: kivy-apk
         path: bin/*.apk
         if-no-files-found: warn
+    
+    - name: Upload build log on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-log
+        path: build.log
+        if-no-files-found: ignore

@@ -20,6 +20,10 @@ android.ndk = 25b
 android.accept_sdk_license = True
 android.gradle_dependencies = 
 
+# Optimization flags
+android.release_artifact = apk
+android.logcat_filters = *:S python:D
+
 [buildozer]
 log_level = 2
 warn_on_root = 1

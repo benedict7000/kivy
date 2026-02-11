@@ -1,30 +1,28 @@
-FROM ubuntu:22.04
+FROM python:3.10-slim
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    openjdk-11-jdk \
-    android-sdk \
-    android-sdk-build-tools \
-    git \
-    wget \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1
 
-# Install buildozer and dependencies
-RUN pip3 install buildozer cython kivy kivymd
+# Install system dependencies in one layer
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openjdk-21-jdk-headless \
+    git wget unzip build-essential libffi-dev libssl-dev ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-# Set Android SDK path
-ENV ANDROID_SDK_ROOT=/usr/lib/android-sdk
-ENV ANDROID_NDK_ROOT=/opt/android-ndk
+# Install pip packages with retries
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# Create app directory
+RUN pip install --no-cache-dir cython
+
+RUN pip install --no-cache-dir buildozer
+
+RUN pip install --no-cache-dir kivy
+
 WORKDIR /app
 
-# Copy app files
 COPY main.py .
 COPY buildozer.spec .
 
-# Build APK
+RUN mkdir -p bin
+
 CMD ["buildozer", "android", "debug"]
