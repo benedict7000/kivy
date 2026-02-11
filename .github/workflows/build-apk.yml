@@ -36,13 +36,12 @@ jobs:
           build-essential \
           libffi-dev \
           libssl-dev \
-          libncurses5 \
-          libncurses5-dev
+          ca-certificates
     
     - name: Install Python dependencies
       run: |
-        python -m pip install --upgrade pip setuptools wheel
-        pip install --upgrade cython buildozer kivy
+        python -m pip install --upgrade pip setuptools wheel cython
+        pip install buildozer kivy kivymd
     
     - name: Build APK with timeout
       timeout-minutes: 120
